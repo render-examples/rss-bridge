@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://render.com/schema/render.yaml.json
+#
+# RSS-Bridge wrapper. This repo does not contain the app.
+# The service pulls the official image from Docker Hub at a pinned version.
+# To upgrade, bump the image tag below and push.
+# Upstream: https://github.com/rss-bridge/rss-bridge
+
+previews:
+  generation: off
+
+projects:
+  - name: rss-bridge
+    environments:
+      - name: production
+        services:
+          - type: web
+            name: rss-bridge
+            runtime: image
+            image:
+              url: docker.io/rssbridge/rss-bridge:2026-09-30
+            plan: starter
+            region: oregon
+            # No disk: RSS-Bridge keeps nothing but a feed cache, which it
+            # rebuilds after a deploy. Every URL needs the token, so there is
+            # no health check path; Render checks that port 80 is open.
+            envVars:
+              # Required on every request. RSS-Bridge adds it to the feed URLs
+              # it generates, so feed readers work. Without it, anyone could use
+              # this instance to fetch other sites.
+              - key: RSSBRIDGE_authentication_token
+                generateValue: true
+              - key: RSSBRIDGE_system_timezone
+                value: UTC
